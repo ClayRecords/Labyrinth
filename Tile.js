@@ -4,8 +4,8 @@ class Tile {
         this.gx = gx;
         this.gy = gy;
         this.size = size;
-        this.lx = this.gx * this.size;
-        this.ly = this.gy * this.size;
+        this.lx = (this.gx * this.size) + gridOffset;
+        this.ly = (this.gy * this.size) + gridOffset;
 
         this.sections = this.makeSections();
     }
@@ -61,12 +61,21 @@ class Tile {
         }
     }
 
-    wasTarget() {
-        return (mouseX > this.lx && mouseX < this.lx + this.size && mouseY > this.ly && mouseY < this.ly + this.size);
+    isTarget(x, y) {
+        return pointRectangleCollision(x, y, this.lx, this.ly, this.size, this.size);
+    }
+
+    clicked(x, y) {
+        if (this.isTarget(x, y)) {
+            this.click();
+            return true;
+        }
+        return false;
     }
 
     click() {
         var rightClicked = mouseButton == RIGHT;
+        console.log("Clicked Tile");
     }
 }
 

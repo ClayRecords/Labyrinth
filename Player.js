@@ -3,8 +3,8 @@ class Player {
     constructor(startingTile, color) {
         this.tileOn = startingTile;
         var offset = this.tileOn.size / 2;
-        this.lx = (startingTile.gx * this.tileOn.size) + offset;
-        this.ly = (startingTile.gy * this.tileOn.size) + offset;
+        this.lx = startingTile.lx + offset;
+        this.ly = startingTile.ly + offset;
         this.size = this.tileOn.size / 4;
         this.color = color;
         this.ableToMove = true;
@@ -57,19 +57,19 @@ class Player {
 
     checkBorderCollision(xSpeed, ySpeed) {
         // If I keep moving in my current X direction, will I collide with the border?
-        if (this.lx + xSpeed + (this.size / 2) > width) {
-            this.lx = width - (this.size / 2);
+        if (this.lx + xSpeed + (this.size / 2) > width - gridOffset) {
+            this.lx = (width - gridOffset) - (this.size / 2);
             xSpeed = 0;
-        } else if (this.lx + xSpeed - (this.size / 2) < 0) {
-            this.lx = this.size / 2;
+        } else if (this.lx + xSpeed - (this.size / 2) < gridOffset) {
+            this.lx = gridOffset + this.size / 2;
             xSpeed = 0;
         }
         // If I keep moving in my current Y direction, will I collide with the border?
-        if (this.ly + ySpeed + (this.size / 2) > height) {
-            this.ly = height - (this.size / 2);
+        if (this.ly + ySpeed + (this.size / 2) > height - gridOffset) {
+            this.ly = (height - gridOffset) - (this.size / 2);
             ySpeed = 0;
-        } else if (this.ly + ySpeed - (this.size / 2) < 0) {
-            this.ly = this.size / 2;
+        } else if (this.ly + ySpeed - (this.size / 2) < gridOffset) {
+            this.ly = gridOffset + this.size / 2;
             ySpeed = 0;
         }
         return [xSpeed, ySpeed];
@@ -105,8 +105,8 @@ class Player {
     }
 
     getTileOn() {
-        var gx = floor(this.lx / tileSize);
-        var gy = floor(this.ly / tileSize);
+        var gx = floor((this.lx - gridOffset) / tileSize);
+        var gy = floor((this.ly - gridOffset) / tileSize);
         this.tileOn = grid[[gx, gy]];
     }
 
