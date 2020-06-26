@@ -83,12 +83,12 @@ class Player {
                 var neighborSection = neighborTile.sections[Object.keys(neighborTile.sections)[xy]];
                 if (!neighborSection.enterable) {
                     // If I keep moving in my current X direction, will I collide with this section?
-                    if (circleRect(this.lx + xSpeed, this.ly, this.size / 2,
+                    if (circleRectangleCollision(this.lx + xSpeed, this.ly, this.size / 2,
                         neighborSection.lx, neighborSection.ly, neighborSection.size, neighborSection.size)) {
                         xSpeed = 0;
                     }
                     // If I keep moving in my current Y direction, will I collide with this section?
-                    if (circleRect(this.lx, this.ly + ySpeed, this.size / 2,
+                    if (circleRectangleCollision(this.lx, this.ly + ySpeed, this.size / 2,
                         neighborSection.lx, neighborSection.ly, neighborSection.size, neighborSection.size)) {
                         ySpeed = 0;
                     }

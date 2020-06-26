@@ -65,14 +65,6 @@ class Tile {
         return pointRectangleCollision(x, y, this.lx, this.ly, this.size, this.size);
     }
 
-    clicked(x, y) {
-        if (this.isTarget(x, y)) {
-            this.click();
-            return true;
-        }
-        return false;
-    }
-
     click() {
         var rightClicked = mouseButton == RIGHT;
         console.log("Clicked Tile");

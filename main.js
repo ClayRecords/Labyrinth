@@ -2,6 +2,8 @@ var rows = 5;
 var cols = 5;
 var tileSize = 60;
 var gridOffset = 30;
+var gridHeight = rows * tileSize;
+var gridWidth = cols * tileSize;
 var grid;
 var arrows;
 var player;
@@ -9,7 +11,7 @@ var ableToMovePlayer = true;
 
 
 function setup() {
-    var canvas = createCanvas((cols * tileSize) + (gridOffset * 2), (rows * tileSize) + (gridOffset * 2));
+    var canvas = createCanvas(gridWidth + (gridOffset * 2), gridHeight + (gridOffset * 2));
     canvas.parent('canvasContainer');
     $('.p5Canvas').on('contextmenu', event => event.preventDefault());
     resetSketch();
@@ -35,8 +37,11 @@ function makeArrows() {
     var arrows = [];
     for (var x = 0; x < cols; x++) {
         arrows.push(new DownArrow(x));
+        arrows.push(new UpArrow(x));
     }
     for (var y = 0; y < rows; y++) {
+        arrows.push(new RightArrow(y));
+        arrows.push(new LeftArrow(y));
     }
     return arrows;
 }
@@ -65,24 +70,19 @@ function mouseHovered() {
 
     for (var i = 0; i < arrows.length; i++) {
         var arrow = arrows[i];
-        if (!foundTarget && arrow.hovered(mouseX, mouseY)) {
+        if (!foundTarget && arrow.isTarget(mouseX, mouseY)) {
             foundTarget = true;
+            arrow.hover();
         }
     }
 }
 
 function mousePressed() {
-    
+
 }
 
 function mouseDragged() {
-    var foundTarget = false;
-    for (var xy = 0; xy < Object.keys(grid).length; xy++) {
-        var tile = grid[Object.keys(grid)[xy]];
-        if (!foundTarget && tile.isTarget(mouseX, mouseY)) {
-            foundTarget = true;
-        }
-    }
+    
 }
 
 function mouseReleased() {
@@ -90,8 +90,9 @@ function mouseReleased() {
 
     for (var i = 0; i < arrows.length; i++) {
         var arrow = arrows[i];
-        if (!foundTarget && arrow.clicked(mouseX, mouseY)) {
+        if (!foundTarget && arrow.isTarget(mouseX, mouseY)) {
             foundTarget = true;
+            arrow.click();
         }
     }
 
@@ -99,9 +100,9 @@ function mouseReleased() {
 
     for (var xy = 0; xy < Object.keys(grid).length; xy++) {
         var tile = grid[Object.keys(grid)[xy]];
-        if (!foundTarget && tile.clicked(mouseX, mouseY)) {
+        if (!foundTarget && tile.isTarget(mouseX, mouseY)) {
             foundTarget = true;
-
+            tile.click();
         }
     }
 }
