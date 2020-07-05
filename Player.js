@@ -1,4 +1,8 @@
 var playerSpeed = 1;
+var MoveLeftKeyCode = 65;
+var MoveRightKeyCode = 68;
+var MoveUpKeyCode = 87;
+var MoveDownKeyCode = 83;
 
 class Player {
     constructor(startingTile, color) {
@@ -22,16 +26,16 @@ class Player {
     move() {
         if (this.ableToMove) {
             var speedVector = new p5.Vector(0, 0);
-            if (keyIsDown(LEFT_ARROW)) {
+            if (keyIsDown(MoveLeftKeyCode)) {
                 speedVector.x -= playerSpeed;
             }
-            if (keyIsDown(RIGHT_ARROW)) {
+            if (keyIsDown(MoveRightKeyCode)) {
                 speedVector.x += playerSpeed;
             }
-            if (keyIsDown(UP_ARROW)) {
+            if (keyIsDown(MoveUpKeyCode)) {
                 speedVector.y -= playerSpeed;
             }
-            if (keyIsDown(DOWN_ARROW)) {
+            if (keyIsDown(MoveDownKeyCode)) {
                 speedVector.y += playerSpeed;
             }
 
