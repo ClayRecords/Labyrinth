@@ -6,7 +6,7 @@ function circleRectangleCollision(cx, cy, radius, rx, ry, rw, rh) {
     testY = cy;
 
     // which edge is closest?
-    if (cx < rx) {// test left edge
+    if (cx < rx) {// left edge
         testX = rx;
     } else if (cx > rx + rw) {
         testX = rx + rw;// right edge
@@ -27,6 +27,31 @@ function circleRectangleCollision(cx, cy, radius, rx, ry, rw, rh) {
         return true;
     }
     return false;
+}
+
+function getDistanceFromCircleToRectangle(cx, cy, radius, rx, ry, rw, rh) {
+    // temporary variables to set edges for testing
+    testX = cx;
+    testY = cy;
+
+    // which edge is closest?
+    if (cx < rx) {// left edge
+        testX = rx;
+    } else if (cx > rx + rw) {
+        testX = rx + rw;// right edge
+    }
+    if (cy < ry) {// top edge
+        testY = ry;
+    } else if (cy > ry + rh) {// bottom edge
+        testY = ry + rh;
+    }
+
+    // get distance from closest edges
+    distX = testX - cx;
+    distY = testY - cy;
+    distance = new p5.Vector(distX, distY);
+
+    return distance;
 }
 
 function pointTriangleCollision(px, py, x1, y1, x2, y2, x3, y3) {

@@ -51,7 +51,7 @@ class Tile {
     show() {
         stroke(0);
         noFill();
-        strokeWeight(3);
+        strokeWeight(2);
         rect(this.lx, this.ly, this.size, this.size);
         strokeWeight(1);
 

@@ -7,17 +7,18 @@ var gridWidth = cols * tileSize;
 var grid;
 var arrows;
 var player;
-var ableToMovePlayer = true;
 
 
 function setup() {
     var canvas = createCanvas(gridWidth + (gridOffset * 2), gridHeight + (gridOffset * 2));
     canvas.parent('canvasContainer');
     $('.p5Canvas').on('contextmenu', event => event.preventDefault());
+    //frameRate(3)
     resetSketch();
 }
 
 function resetSketch() {
+    console.clear();
     grid = makeGrid(cols, rows);
     arrows = makeArrows();
     player = new Player(grid[[0, 0]], "red");
