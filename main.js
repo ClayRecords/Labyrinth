@@ -1,7 +1,10 @@
 var rows = 5;
 var cols = 5;
 var tileSize = 60;
-var gridOffset = 30;
+var extraTileMargin = tileSize;
+var arrowOffset = extraTileMargin;
+var arrowMargin = 15;
+var gridOffset = extraTileMargin + arrowMargin;
 var gridHeight = rows * tileSize;
 var gridWidth = cols * tileSize;
 var grid;
@@ -51,7 +54,7 @@ function draw() {
     background(255);
     stroke(0);
     cursor('default');
-    mouseHovered()
+    mouseHovered();
     for (var xy = 0; xy < Object.keys(grid).length; xy++) {
         var tile = grid[Object.keys(grid)[xy]];
         tile.show();
@@ -79,11 +82,9 @@ function mouseHovered() {
 }
 
 function mousePressed() {
-
 }
 
 function mouseDragged() {
-    
 }
 
 function mouseReleased() {

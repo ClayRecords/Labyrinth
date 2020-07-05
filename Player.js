@@ -1,8 +1,9 @@
 var playerSpeed = 1;
-var MoveLeftKeyCode = 65;
-var MoveRightKeyCode = 68;
-var MoveUpKeyCode = 87;
-var MoveDownKeyCode = 83;
+var MoveLeftKeyCode = 65; // A
+var MoveRightKeyCode = 68; // D
+var MoveUpKeyCode = 87; // W
+var MoveDownKeyCode = 83; // S
+var InteractKeyCode = 32; // Space
 
 class Player {
     constructor(startingTile, color) {
@@ -17,7 +18,6 @@ class Player {
     }
 
     show() {
-        //console.log(this.lx.toString() + ", " + this.ly.toString())
         stroke(0);
         fill(this.color);
         ellipse(this.lx, this.ly, this.size, this.size);

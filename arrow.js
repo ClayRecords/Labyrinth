@@ -27,51 +27,53 @@ class Arrow {
 class DownArrow extends Arrow {
     constructor(col) {
         super(null, col);
-        var glx = col * tileSize;
-        this.p1x = gridOffset + glx + (tileSize / 3);
-        this.p1y = gridOffset / 3;
-        this.p2x = gridOffset + glx + (tileSize * 2 / 3);
-        this.p2y = gridOffset / 3;
-        this.p3x = gridOffset + glx + (tileSize / 2);
-        this.p3y = gridOffset * 2 / 3;
+        var glx = arrowMargin + arrowOffset + (col * tileSize);
+        this.p1x = glx + (tileSize / 2.4);
+        this.p1y = arrowOffset + (arrowMargin / 3);
+        this.p2x = glx + tileSize - (tileSize / 2.4);
+        this.p2y = arrowOffset + (arrowMargin / 3);
+        this.p3x = glx + (tileSize / 2);
+        this.p3y = arrowOffset + (arrowMargin * 2 / 3);
     }
 }
 
 class UpArrow extends Arrow {
     constructor(col) {
         super(null, col);
-        var glx = col * tileSize;
-        this.p1x = gridOffset + glx + (tileSize / 3);
-        this.p1y = gridHeight + gridOffset + (gridOffset * 2 / 3);
-        this.p2x = gridOffset + glx + (tileSize * 2 / 3);
-        this.p2y = gridHeight + gridOffset + (gridOffset * 2 / 3);
-        this.p3x = gridOffset + glx + (tileSize / 2);
-        this.p3y = gridHeight + gridOffset + (gridOffset / 3);
+        var glx = arrowMargin + arrowOffset + (col * tileSize);
+        var y = height - arrowOffset - arrowMargin;
+        this.p1x = glx + (tileSize / 2.4);
+        this.p1y = y + (arrowMargin * 2 / 3);
+        this.p2x = glx + tileSize - (tileSize / 2.4);
+        this.p2y = y + (arrowMargin * 2 / 3);
+        this.p3x = glx + (tileSize / 2);
+        this.p3y = y + (arrowMargin / 3);
     }
 }
 
 class RightArrow extends Arrow {
     constructor(row) {
         super(row, null);
-        var gly = row * tileSize;
-        this.p1x = gridOffset / 3;
-        this.p1y = gridOffset + gly + (tileSize / 3)
-        this.p2x = gridOffset / 3;
-        this.p2y = gridOffset + gly + (tileSize * 2 / 3);
-        this.p3x = gridOffset * 2 / 3;
-        this.p3y = gridOffset + gly + (tileSize / 2);
+        var gly = arrowMargin + arrowOffset + (row * tileSize);
+        this.p1x = arrowOffset + (arrowMargin / 3);
+        this.p1y = gly + (tileSize / 2.4);
+        this.p2x = arrowOffset + (arrowMargin / 3);
+        this.p2y = gly + tileSize - (tileSize / 2.4);
+        this.p3x = arrowOffset + (arrowMargin * 2 / 3);
+        this.p3y = gly + (tileSize / 2);
     }
 }
 
 class LeftArrow extends Arrow {
     constructor(row) {
         super(row, null);
-        var gly = row * tileSize;
-        this.p1x = gridWidth + gridOffset + (gridOffset * 2 / 3);
-        this.p1y = gridOffset + gly + (tileSize / 3)
-        this.p2x = gridWidth + gridOffset + (gridOffset * 2 / 3);
-        this.p2y = gridOffset + gly + (tileSize * 2 / 3);
-        this.p3x = gridWidth + gridOffset + (gridOffset / 3);
-        this.p3y = gridOffset + gly + (tileSize / 2);
+        var gly = arrowMargin + arrowOffset + (row * tileSize);
+        var x = width - arrowOffset - arrowMargin;
+        this.p1x = x + (arrowMargin * 2 / 3);
+        this.p1y = gly + (tileSize / 2.4);
+        this.p2x = x + (arrowMargin * 2 / 3);
+        this.p2y = gly + tileSize - (tileSize / 2.4);
+        this.p3x = x + (arrowMargin / 3); //yellow point
+        this.p3y = gly + (tileSize / 2);
     }
 }
