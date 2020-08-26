@@ -8,8 +8,10 @@ var gridOffset = extraTileMargin + arrowMargin;
 var gridHeight = rows * tileSize;
 var gridWidth = cols * tileSize;
 var grid;
+var extraTile;
 var arrows;
 var player;
+var shapes;
 
 
 function setup() {
@@ -17,12 +19,13 @@ function setup() {
     canvas.parent('canvasContainer');
     $('.p5Canvas').on('contextmenu', event => event.preventDefault());
     //frameRate(3)
-    resetSketch();
+    resetSketch(false);
 }
 
-function resetSketch() {
-    console.clear();
+function resetSketch(clear = true) {
+    if (clear) console.clear();
     grid = makeGrid(cols, rows);
+    extraTile = new Tile(0, 0, tileSize);
     arrows = makeArrows();
     player = new Player(grid[[0, 0]], "red");
 }
@@ -31,7 +34,7 @@ function makeGrid(cols, rows) {
     var grid = {};
     for (var x = 0; x < cols; x++) {
         for (var y = 0; y < rows; y++) {
-            grid[[x, y]] = new Tile(x, y, tileSize);
+            grid[[x, y]] = new GridTile(x, y, tileSize);
         }
     }
     return grid;
@@ -51,14 +54,16 @@ function makeArrows() {
 }
 
 function draw() {
+    shapes = [];
     background(255);
-    stroke(0);
     cursor('default');
     mouseHovered();
     for (var xy = 0; xy < Object.keys(grid).length; xy++) {
         var tile = grid[Object.keys(grid)[xy]];
         tile.show();
     }
+
+    extraTile.show();
 
     for (var i = 0; i < arrows.length; i++) {
         var arrow = arrows[i];
@@ -67,6 +72,18 @@ function draw() {
 
     player.move();
     player.show();
+
+    noFill();
+    for (var i = 0; i < shapes.length; i++) {
+        var shape = shapes[i];
+        if (shape["shape"] == "point") {
+            point(shape["x"], shape["y"])
+        } else if (shape["shape"] == "ellipse") {
+            ellipse(shape["x"], shape["y"], shape["width"], shape["height"])
+        } else if (shape["shape"] == "circle") {
+            circle(shape["x"], shape["y"], shape["diameter"])
+        }
+    }
 }
 
 function mouseHovered() {
@@ -96,9 +113,10 @@ function mouseReleased() {
             foundTarget = true;
             arrow.click();
         }
+        if (foundTarget) {
+            return;
+        }
     }
-
-    if (foundTarget) return;
 
     for (var xy = 0; xy < Object.keys(grid).length; xy++) {
         var tile = grid[Object.keys(grid)[xy]];
@@ -106,5 +124,25 @@ function mouseReleased() {
             foundTarget = true;
             tile.click();
         }
+        if (foundTarget) {
+            return;
+        }
     }
+
+    if (!foundTarget && extraTile.isTarget(mouseX, mouseY)) {
+        foundTarget = true;
+        extraTile.click();
+    }
+}
+
+function signOf(x) {
+    if (x == 0) {
+        return 0;
+    }
+    return x / Math.abs(x);
+}
+
+function roundToDigits(x, digits) {
+    var place = 10 ** digits;
+    return Math.round(x * place) / place;
 }

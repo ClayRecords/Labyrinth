@@ -29,7 +29,7 @@ function circleRectangleCollision(cx, cy, radius, rx, ry, rw, rh) {
     return false;
 }
 
-function getDistanceFromCircleToRectangle(cx, cy, radius, rx, ry, rw, rh) {
+function getDistanceFromCircleToRectangle(cx, cy, rx, ry, rw, rh) {
     // temporary variables to set edges for testing
     testX = cx;
     testY = cy;

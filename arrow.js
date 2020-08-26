@@ -15,7 +15,7 @@ class Arrow {
     }
 
     click() {
-        console.log("clicked Arrow");
+        console.log("Clicked Arrow");
     }
 
     hover() {
@@ -73,7 +73,7 @@ class LeftArrow extends Arrow {
         this.p1y = gly + (tileSize / 2.4);
         this.p2x = x + (arrowMargin * 2 / 3);
         this.p2y = gly + tileSize - (tileSize / 2.4);
-        this.p3x = x + (arrowMargin / 3); //yellow point
+        this.p3x = x + (arrowMargin / 3);
         this.p3y = gly + (tileSize / 2);
     }
 }

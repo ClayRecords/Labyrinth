@@ -1,11 +1,11 @@
 
 class Tile {
-    constructor(gx, gy, size) {
-        this.gx = gx;
-        this.gy = gy;
+    constructor(lx, ly, size) {
+        this.lx = lx;
+        this.ly = ly;
+        this.gx = null;
+        this.gy = null;
         this.size = size;
-        this.lx = (this.gx * this.size) + gridOffset;
-        this.ly = (this.gy * this.size) + gridOffset;
 
         this.sections = this.makeSections();
     }
@@ -71,6 +71,17 @@ class Tile {
     }
 }
 
+
+class GridTile extends Tile {
+    constructor(gx, gy, size) {
+        var lx = (gx * size) + gridOffset;
+        var ly = (gy * size) + gridOffset;
+        super(lx, ly, size);
+        this.gx = gx;
+        this.gy = gy;
+    }
+}
+
 class TileSection {
     constructor(parentTile, lx, ly, size) {
         this.parentTile = parentTile;
@@ -89,10 +100,11 @@ class Wall extends TileSection {
     constructor(parentTile, lx, ly, size) {
         super(parentTile, lx, ly, size);
         this.enterable = false;
+        this.color = "yellow";
     }
 
     show() {
-        fill("yellow");
+        fill(this.color);
         rect(this.lx, this.ly, this.size, this.size);
     }
 }

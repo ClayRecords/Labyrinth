@@ -1,4 +1,4 @@
-var playerSpeed = 1;
+var playerSpeed = 3;
 var MoveLeftKeyCode = 65; // A
 var MoveRightKeyCode = 68; // D
 var MoveUpKeyCode = 87; // W
@@ -43,6 +43,15 @@ class Player {
                 this.checkBorderCollision(speedVector);
             }
 
+            var neighborTiles = this.getNeighborTiles();
+            for (var n = 0; n < neighborTiles.length; n++) {
+                var neighborTile = neighborTiles[n];
+                for (var xy = 0; xy < Object.keys(neighborTile.sections).length; xy++) {
+                    var neighborSection = neighborTile.sections[Object.keys(neighborTile.sections)[xy]];
+                    neighborSection.color = "yellow";
+                }
+            }
+
             if (speedVector.x != 0 || speedVector.y != 0) {
                 this.checkTileCollision(speedVector);
             }
@@ -50,8 +59,9 @@ class Player {
             if (speedVector.x != 0 || speedVector.y != 0) {
                 this.lx += speedVector.x;
                 this.ly += speedVector.y;
-                this.getTileOn();
             }
+
+            this.getTileOn();
         }
     }
 
@@ -76,94 +86,81 @@ class Player {
     }
 
     checkTileCollision(speedVector) {
+        var closestNeighbor;
+        var closestNeighborDistance;
+        var closestNeighborMag;
+
         var neighborTiles = this.getNeighborTiles();
         for (var n = 0; n < neighborTiles.length; n++) {
             var neighborTile = neighborTiles[n];
             for (var xy = 0; xy < Object.keys(neighborTile.sections).length; xy++) {
                 var neighborSection = neighborTile.sections[Object.keys(neighborTile.sections)[xy]];
+                neighborSection.color = "yellow";
                 if (!neighborSection.enterable) {
-                    // If I keep moving in my current X direction, will I collide with this section?
-                    if (circleRectangleCollision(this.lx + speedVector.x, this.ly, this.radius,
-                        neighborSection.lx, neighborSection.ly, neighborSection.size, neighborSection.size)) {
-
-                        console.log("---- X Collision ----")
-                        console.log("Position: " + this.lx.toString())
-                        console.log("Radius: " + this.radius.toString())
-                        console.log("Speed: " + speedVector.x.toString())
-
-                        console.log("Neighbor Position: " + neighborSection.lx.toString())
-                        console.log("Neighbor Size: " + neighborSection.size.toString())
-
-                        var d = getDistanceFromCircleToRectangle(this.lx, this.ly, this.radius,
-                            neighborSection.lx, neighborSection.ly, neighborSection.size, neighborSection.size);
-                        console.log(d.toString())
-
-                        var td = Math.sqrt((d.x * d.x) + (d.y * d.y))
-                        console.log("td: " + td.toString())
-                        var ratio = this.radius / td;
-                        ratio = (1 - Math.abs(ratio)) * (ratio / Math.abs(ratio))
-                        d.mult(ratio)
-                        console.log("newD: " + d.toString())
-
-                        if (d.x != 0) {
-                            xDistanceToMove = d.x - (d.x / Math.abs(d.x));
-                            this.lx = this.lx + xDistanceToMove;
-                        } else if (speedVector.x != 0) {
-                            console.warn("Centered on x")
-                            var xDistanceToMove = this.radius * (-speedVector.x / Math.abs(speedVector.x));
-                            xDistanceToMove = xDistanceToMove - (speedVector.x / Math.abs(speedVector.x));
-                            this.lx = this.lx + xDistanceToMove;
-                        } else {
-                            console.warn("Here x")
-                        }
-                        console.log("Set position to: " + this.lx.toString())
-                        speedVector.x = 0;
+                    // If I keep moving in my current X direction, how far will I be from this section?
+                    var d = getDistanceFromCircleToRectangle(this.lx + speedVector.x, this.ly + speedVector.y,
+                        neighborSection.lx, neighborSection.ly, neighborSection.size, neighborSection.size);
+                    if (closestNeighbor === undefined) {
+                        closestNeighbor = neighborSection;
+                        closestNeighborDistance = d;
+                        closestNeighborMag = d.mag();
+                    } else if (Math.abs(d.mag()) < Math.abs(closestNeighborMag)) {
+                        closestNeighbor = neighborSection;
+                        closestNeighborDistance = d;
+                        closestNeighborMag = d.mag();
                     }
-                    // If I keep moving in my current Y direction, will I collide with this section?
-                    if (circleRectangleCollision(this.lx, this.ly + speedVector.y, this.radius,
-                        neighborSection.lx, neighborSection.ly, neighborSection.size, neighborSection.size)) {
-
-                        console.log("---- Y Collision ----")
-                        console.log("Position: " + this.ly.toString())
-                        console.log("Radius: " + this.radius.toString())
-                        console.log("Speed: " + speedVector.y.toString())
-
-                        console.log("Neighbor Position: " + neighborSection.ly.toString())
-                        console.log("Neighbor Size: " + neighborSection.size.toString())
-
-                        var d = getDistanceFromCircleToRectangle(this.lx, this.ly, this.radius,
-                            neighborSection.lx, neighborSection.ly, neighborSection.size, neighborSection.size);
-                        console.log(d.toString())
-
-                        var td = Math.sqrt((d.x * d.x) + (d.y * d.y))
-                        console.log("td: " + td.toString())
-                        var ratio = this.radius / td;
-                        ratio = (1 - Math.abs(ratio)) * (ratio / Math.abs(ratio))
-                        d.mult(ratio)
-                        console.log("newD: " + d.toString())
-
-                        if (d.y != 0) {
-                            yDistanceToMove = d.y - (d.y / Math.abs(d.y));
-                            this.ly = this.ly + yDistanceToMove;
-                        } else if (speedVector.y != 0) {
-                            console.warn("Centered on y")
-                            var yDistanceToMove = this.radius * (-speedVector.y / Math.abs(speedVector.y));
-                            yDistanceToMove = yDistanceToMove - (speedVector.y / Math.abs(speedVector.y));
-                            this.ly = this.ly + yDistanceToMove;
-                        } else {
-                            console.warn("Here y")
-                        }
-
-                        console.log("Set position to: " + this.ly.toString())
-                        speedVector.y = 0;
-                    }
-                }
-                if (speedVector.x == 0 && speedVector.y == 0) {
-                    break;
                 }
             }
-            if (speedVector.x == 0 && speedVector.y == 0) {
-                break;
+        }
+
+        closestNeighbor.color = "orange";
+
+        console.log("")
+        if (Math.abs(closestNeighborMag) - 1 < this.radius) {
+            console.log("Pos: " + this.lx.toString() + ", " + this.ly.toString())
+            console.log("Pos: " + closestNeighbor.lx.toString() + ", " + closestNeighbor.ly.toString())
+            console.log("Distance: " + closestNeighborDistance.toString())
+            console.log("Mag: " + closestNeighborMag.toString())
+
+            shapes.push({ "shape": "circle", "x": this.lx + speedVector.x, "y": this.ly + speedVector.y, "diameter": this.size })
+            closestNeighbor.color = "red";
+
+            var d = getDistanceFromCircleToRectangle(this.lx, this.ly,
+                closestNeighbor.lx, closestNeighbor.ly, closestNeighbor.size, closestNeighbor.size);
+            console.log("Distance: " + d.toString())
+            console.log("Mag: " + d.mag().toString())
+            console.log("Travel: " + (d.mag() - this.radius - 1).toString())
+
+            if (speedVector.x != 0 && d.x != 0 && d.y == 0) {
+                console.log("X");
+                var sign = signOf(d.x);
+                var distanceToMove = d.x - this.radius * sign;
+                distanceToMove = distanceToMove - sign;
+                this.lx = this.lx + distanceToMove;
+                speedVector.x = 0;
+            } else if (speedVector.y != 0 && d.y != 0 && d.x == 0) {
+                console.log("Y");
+                var sign = signOf(d.y);
+                var distanceToMove = d.y - this.radius * sign;
+                distanceToMove = distanceToMove - sign;
+                this.ly = this.ly + distanceToMove;
+                speedVector.y = 0;
+            } else {
+                console.log("X and Y");
+                var travelDistance = d.mag() - this.radius - 1;
+
+                var xRatio = d.x / d.mag();
+                var xDistanceToMove = xRatio * travelDistance
+                console.log("xDistanceToMove: " + xDistanceToMove.toString());
+                this.lx = this.lx + xDistanceToMove;
+
+                var yRatio = d.y / d.mag();
+                var yDistanceToMove = yRatio * travelDistance
+                console.log("yDistanceToMove: " + yDistanceToMove.toString());
+                this.ly = this.ly + yDistanceToMove;
+
+                speedVector.x = 0;
+                speedVector.y = 0;
             }
         }
         return speedVector;
