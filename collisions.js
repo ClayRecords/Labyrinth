@@ -75,3 +75,51 @@ function pointTriangleCollision(px, py, x1, y1, x2, y2, x3, y3) {
 function pointRectangleCollision(px, py, rx, ry, width, height) {
     return (px > rx && px < (rx + width) && py > ry && py < ry + height);
 }
+
+class PlayerCollision {
+    constructor(object, distance) {
+        this.object = object;
+        this.distance = distance;
+        this.magnitude = distance.mag();
+    }
+
+    getTravelDistance(speed, radius) {
+        var travelDistance = new p5.Vector(speed.x, speed.y);
+        if (speed.x != 0 && this.distance.y == 0) {
+            // There is a purely horizontal collision
+            travelDistance.x = this.getComponentTravelDistance(this.distance.x, radius);
+        } else if (speed.y != 0 && this.distance.x == 0) {
+            // There is a purely vertical collision
+            travelDistance.y = this.getComponentTravelDistance(this.distance.y, radius);
+        } else {
+            // There is a horizontal collision and vertical collision
+            var movementDistance = this.magnitude - radius - 1;
+
+            if (speed.x != 0) {
+                var xMovementDistance = this.getRatiodTravelDistance(this.distance.x, movementDistance)
+                console.log("xMovementDistance: " + xMovementDistance.toString());
+                travelDistance.x = xMovementDistance;
+            }
+
+            if (speed.y != 0) {
+                var yMovementDistance = this.getRatiodTravelDistance(this.distance.y, movementDistance)
+                console.log("yMovementDistance: " + yMovementDistance.toString());
+                travelDistance.y = yMovementDistance;
+            }
+        }
+        console.log(travelDistance);
+        return travelDistance;
+    }
+
+    getComponentTravelDistance(componentDistance, radius) {
+        var sign = signOf(componentDistance);
+        var travelDistance = componentDistance - (radius * sign) - sign;
+        return travelDistance;
+    }
+
+    getRatiodTravelDistance(componentDistance, movementDistance) {
+        var ratio = componentDistance / this.magnitude;
+        var travelDistance = ratio * movementDistance;
+        return travelDistance;
+    }
+}

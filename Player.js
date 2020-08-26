@@ -24,6 +24,15 @@ class Player {
     }
 
     move() {
+        var neighborTiles = this.getNeighborTiles();
+        for (var n = 0; n < neighborTiles.length; n++) {
+            var neighborTile = neighborTiles[n];
+            for (var xy = 0; xy < Object.keys(neighborTile.sections).length; xy++) {
+                var neighborSection = neighborTile.sections[Object.keys(neighborTile.sections)[xy]];
+                neighborSection.color = "yellow";
+            }
+        }
+
         if (this.ableToMove) {
             var speedVector = new p5.Vector(0, 0);
             if (keyIsDown(MoveLeftKeyCode)) {
@@ -40,20 +49,11 @@ class Player {
             }
 
             if (speedVector.x != 0 || speedVector.y != 0) {
-                this.checkBorderCollision(speedVector);
-            }
-
-            var neighborTiles = this.getNeighborTiles();
-            for (var n = 0; n < neighborTiles.length; n++) {
-                var neighborTile = neighborTiles[n];
-                for (var xy = 0; xy < Object.keys(neighborTile.sections).length; xy++) {
-                    var neighborSection = neighborTile.sections[Object.keys(neighborTile.sections)[xy]];
-                    neighborSection.color = "yellow";
-                }
+                speedVector = this.checkBorderCollision(speedVector);
             }
 
             if (speedVector.x != 0 || speedVector.y != 0) {
-                this.checkTileCollision(speedVector);
+                speedVector = this.checkTileCollision(speedVector);
             }
 
             if (speedVector.x != 0 || speedVector.y != 0) {
@@ -117,51 +117,19 @@ class Player {
 
         console.log("")
         if (Math.abs(closestNeighborMag) - 1 < this.radius) {
-            console.log("Pos: " + this.lx.toString() + ", " + this.ly.toString())
-            console.log("Pos: " + closestNeighbor.lx.toString() + ", " + closestNeighbor.ly.toString())
-            console.log("Distance: " + closestNeighborDistance.toString())
-            console.log("Mag: " + closestNeighborMag.toString())
-
+            
             shapes.push({ "shape": "circle", "x": this.lx + speedVector.x, "y": this.ly + speedVector.y, "diameter": this.size })
             closestNeighbor.color = "red";
 
             var d = getDistanceFromCircleToRectangle(this.lx, this.ly,
                 closestNeighbor.lx, closestNeighbor.ly, closestNeighbor.size, closestNeighbor.size);
-            console.log("Distance: " + d.toString())
-            console.log("Mag: " + d.mag().toString())
-            console.log("Travel: " + (d.mag() - this.radius - 1).toString())
+            var collision = new PlayerCollision(closestNeighbor, d);
 
-            if (speedVector.x != 0 && d.x != 0 && d.y == 0) {
-                console.log("X");
-                var sign = signOf(d.x);
-                var distanceToMove = d.x - this.radius * sign;
-                distanceToMove = distanceToMove - sign;
-                this.lx = this.lx + distanceToMove;
-                speedVector.x = 0;
-            } else if (speedVector.y != 0 && d.y != 0 && d.x == 0) {
-                console.log("Y");
-                var sign = signOf(d.y);
-                var distanceToMove = d.y - this.radius * sign;
-                distanceToMove = distanceToMove - sign;
-                this.ly = this.ly + distanceToMove;
-                speedVector.y = 0;
-            } else {
-                console.log("X and Y");
-                var travelDistance = d.mag() - this.radius - 1;
+            console.log("Distance: " + collision.distance.toString())
+            console.log("Mag: " + collision.magnitude.toString())
 
-                var xRatio = d.x / d.mag();
-                var xDistanceToMove = xRatio * travelDistance
-                console.log("xDistanceToMove: " + xDistanceToMove.toString());
-                this.lx = this.lx + xDistanceToMove;
-
-                var yRatio = d.y / d.mag();
-                var yDistanceToMove = yRatio * travelDistance
-                console.log("yDistanceToMove: " + yDistanceToMove.toString());
-                this.ly = this.ly + yDistanceToMove;
-
-                speedVector.x = 0;
-                speedVector.y = 0;
-            }
+            var distanceToMove = collision.getTravelDistance(speedVector, this.radius);
+            speedVector = distanceToMove;
         }
         return speedVector;
     }
