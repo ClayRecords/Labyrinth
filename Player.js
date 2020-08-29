@@ -86,6 +86,34 @@ class Player {
     }
 
     checkTileCollision(speed) {
+        var collisions = this.getCollisionsAfterMovement(speed);
+        
+        if (collisions.length > 0) {
+            shapes.push({ "shape": "circle", "x": this.lx + speed.x, "y": this.ly + speed.y, "diameter": this.size })
+        }
+
+        console.log("")
+        for (var i = 0; i < collisions.length; i++) {
+            var collision = collisions[i];
+            var object = collision.object;
+
+            collision.object.color = "red";
+
+            var d = getDistanceFromCircleToRectangle(this.lx, this.ly,
+                object.lx, object.ly, object.size, object.size);
+            var constraint = new PlayerTileRelationship(object, d);
+
+            console.log("Distance: " + constraint.distance.toString())
+            console.log("Mag: " + constraint.magnitude.toString())
+
+            var travelDistance = constraint.getTravelDistance(speed, this.radius);
+            console.log("travelDistance: " + travelDistance.toString());
+            speed = travelDistance;
+        }
+        return speed;
+    }
+
+    getCollisionsAfterMovement(speed) {
         var collisions = [];
         var neighborTiles = this.getNeighborTiles();
         for (var n = 0; n < neighborTiles.length; n++) {
@@ -106,28 +134,7 @@ class Player {
                 }
             }
         }
-
-        shapes.push({ "shape": "circle", "x": this.lx + speed.x, "y": this.ly + speed.y, "diameter": this.size })
-
-        console.log("")
-        for (var i = 0; i < collisions.length; i++) {
-            var collisionAfterMovement = collisions[i];
-            var object = collisionAfterMovement.object;
-
-            collisionAfterMovement.object.color = "red";
-
-            var d = getDistanceFromCircleToRectangle(this.lx, this.ly,
-                object.lx, object.ly, object.size, object.size);
-            var collision = new PlayerTileRelationship(object, d);
-
-            console.log("Distance: " + collision.distance.toString())
-            console.log("Mag: " + collision.magnitude.toString())
-
-            var travelDistance = collision.getTravelDistance(speed, this.radius);
-            console.log("travelDistance: " + travelDistance.toString());
-            speed = travelDistance;
-        }
-        return speed;
+        return collisions;
     }
 
     getTileOn() {
