@@ -34,62 +34,59 @@ class Player {
         }
 
         if (this.ableToMove) {
-            var speedVector = new p5.Vector(0, 0);
+            var speed = new p5.Vector(0, 0);
             if (keyIsDown(MoveLeftKeyCode)) {
-                speedVector.x -= playerSpeed;
+                speed.x -= playerSpeed;
             }
             if (keyIsDown(MoveRightKeyCode)) {
-                speedVector.x += playerSpeed;
+                speed.x += playerSpeed;
             }
             if (keyIsDown(MoveUpKeyCode)) {
-                speedVector.y -= playerSpeed;
+                speed.y -= playerSpeed;
             }
             if (keyIsDown(MoveDownKeyCode)) {
-                speedVector.y += playerSpeed;
+                speed.y += playerSpeed;
             }
 
-            if (speedVector.x != 0 || speedVector.y != 0) {
-                speedVector = this.checkBorderCollision(speedVector);
+            if (speed.x != 0 || speed.y != 0) {
+                speed = this.checkBorderCollision(speed);
             }
 
-            if (speedVector.x != 0 || speedVector.y != 0) {
-                speedVector = this.checkTileCollision(speedVector);
+            if (speed.x != 0 || speed.y != 0) {
+                speed = this.checkTileCollision(speed);
             }
 
-            if (speedVector.x != 0 || speedVector.y != 0) {
-                this.lx += speedVector.x;
-                this.ly += speedVector.y;
+            if (speed.x != 0 || speed.y != 0) {
+                this.lx += speed.x;
+                this.ly += speed.y;
             }
 
             this.getTileOn();
         }
     }
 
-    checkBorderCollision(speedVector) {
+    checkBorderCollision(speed) {
         // If I keep moving in my current X direction, will I collide with the border?
-        if (this.lx + speedVector.x + this.radius > width - gridOffset) {
+        if (this.lx + speed.x + this.radius > width - gridOffset) {
             this.lx = (width - gridOffset) - this.radius;
-            speedVector.x = 0;
-        } else if (this.lx + speedVector.x - this.radius < gridOffset) {
+            speed.x = 0;
+        } else if (this.lx + speed.x - this.radius < gridOffset) {
             this.lx = gridOffset + this.radius;
-            speedVector.x = 0;
+            speed.x = 0;
         }
         // If I keep moving in my current Y direction, will I collide with the border?
-        if (this.ly + speedVector.y + this.radius > height - gridOffset) {
+        if (this.ly + speed.y + this.radius > height - gridOffset) {
             this.ly = (height - gridOffset) - this.radius;
-            speedVector.y = 0;
-        } else if (this.ly + speedVector.y - this.radius < gridOffset) {
+            speed.y = 0;
+        } else if (this.ly + speed.y - this.radius < gridOffset) {
             this.ly = gridOffset + this.radius;
-            speedVector.y = 0;
+            speed.y = 0;
         }
-        return speedVector;
+        return speed;
     }
 
-    checkTileCollision(speedVector) {
-        var closestNeighbor;
-        var closestNeighborDistance;
-        var closestNeighborMag;
-
+    checkTileCollision(speed) {
+        var collisions = [];
         var neighborTiles = this.getNeighborTiles();
         for (var n = 0; n < neighborTiles.length; n++) {
             var neighborTile = neighborTiles[n];
@@ -97,41 +94,40 @@ class Player {
                 var neighborSection = neighborTile.sections[Object.keys(neighborTile.sections)[xy]];
                 neighborSection.color = "yellow";
                 if (!neighborSection.enterable) {
-                    // If I keep moving in my current X direction, how far will I be from this section?
-                    var d = getDistanceFromCircleToRectangle(this.lx + speedVector.x, this.ly + speedVector.y,
+                    // If I keep moving in my current direction, how far will I be from this section?
+                    var d = getDistanceFromCircleToRectangle(this.lx + speed.x, this.ly + speed.y,
                         neighborSection.lx, neighborSection.ly, neighborSection.size, neighborSection.size);
-                    if (closestNeighbor === undefined) {
-                        closestNeighbor = neighborSection;
-                        closestNeighborDistance = d;
-                        closestNeighborMag = d.mag();
-                    } else if (Math.abs(d.mag()) < Math.abs(closestNeighborMag)) {
-                        closestNeighbor = neighborSection;
-                        closestNeighborDistance = d;
-                        closestNeighborMag = d.mag();
+                    var relationship = new PlayerTileRelationship(neighborSection, d);
+                    if (relationship.isACollision(this.radius)) {
+                        collisions.push(relationship);
+                    } else if (relationship.magnitude - this.radius < 1.5) {
+                        relationship.object.color = "orange";
                     }
                 }
             }
         }
 
-        closestNeighbor.color = "orange";
+        shapes.push({ "shape": "circle", "x": this.lx + speed.x, "y": this.ly + speed.y, "diameter": this.size })
 
         console.log("")
-        if (Math.abs(closestNeighborMag) - 1 < this.radius) {
-            
-            shapes.push({ "shape": "circle", "x": this.lx + speedVector.x, "y": this.ly + speedVector.y, "diameter": this.size })
-            closestNeighbor.color = "red";
+        for (var i = 0; i < collisions.length; i++) {
+            var collisionAfterMovement = collisions[i];
+            var object = collisionAfterMovement.object;
+
+            collisionAfterMovement.object.color = "red";
 
             var d = getDistanceFromCircleToRectangle(this.lx, this.ly,
-                closestNeighbor.lx, closestNeighbor.ly, closestNeighbor.size, closestNeighbor.size);
-            var collision = new PlayerCollision(closestNeighbor, d);
+                object.lx, object.ly, object.size, object.size);
+            var collision = new PlayerTileRelationship(object, d);
 
             console.log("Distance: " + collision.distance.toString())
             console.log("Mag: " + collision.magnitude.toString())
 
-            var distanceToMove = collision.getTravelDistance(speedVector, this.radius);
-            speedVector = distanceToMove;
+            var travelDistance = collision.getTravelDistance(speed, this.radius);
+            console.log("travelDistance: " + travelDistance.toString());
+            speed = travelDistance;
         }
-        return speedVector;
+        return speed;
     }
 
     getTileOn() {

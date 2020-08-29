@@ -76,11 +76,15 @@ function pointRectangleCollision(px, py, rx, ry, width, height) {
     return (px > rx && px < (rx + width) && py > ry && py < ry + height);
 }
 
-class PlayerCollision {
+class PlayerTileRelationship{
     constructor(object, distance) {
         this.object = object;
         this.distance = distance;
         this.magnitude = distance.mag();
+    }
+
+    isACollision(radius) {
+        return Math.abs(this.magnitude) - 1 < radius;
     }
 
     getTravelDistance(speed, radius) {
@@ -97,17 +101,14 @@ class PlayerCollision {
 
             if (speed.x != 0) {
                 var xMovementDistance = this.getRatiodTravelDistance(this.distance.x, movementDistance)
-                console.log("xMovementDistance: " + xMovementDistance.toString());
                 travelDistance.x = xMovementDistance;
             }
 
             if (speed.y != 0) {
                 var yMovementDistance = this.getRatiodTravelDistance(this.distance.y, movementDistance)
-                console.log("yMovementDistance: " + yMovementDistance.toString());
                 travelDistance.y = yMovementDistance;
             }
         }
-        console.log(travelDistance);
         return travelDistance;
     }
 
