@@ -9,8 +9,7 @@ class Player {
     constructor(startingTile, color) {
         this.tileOn = startingTile;
         var offset = this.tileOn.size / 2;
-        this.lx = startingTile.lx + offset;
-        this.ly = startingTile.ly + offset;
+        this.position = new p5.Vector(startingTile.position.x + offset, startingTile.position.y + offset)
         this.size = this.tileOn.size / 5;
         this.radius = this.size / 2;
         this.color = color;
@@ -20,7 +19,7 @@ class Player {
     show() {
         stroke(0);
         fill(this.color);
-        ellipse(this.lx, this.ly, this.size, this.size);
+        ellipse(this.position.x, this.position.y, this.size, this.size);
     }
 
     move() {
@@ -57,8 +56,8 @@ class Player {
             }
 
             if (speed.x != 0 || speed.y != 0) {
-                this.lx += speed.x;
-                this.ly += speed.y;
+                this.position.x += speed.x;
+                this.position.y += speed.y;
             }
 
             this.getTileOn();
@@ -67,25 +66,25 @@ class Player {
 
     checkBorderCollision(speed) {
         // If I keep moving in my current X direction, will I collide with the border?
-        if (this.lx + speed.x + this.radius > width - gridOffset) {
-            speed.x = (width - gridOffset) - this.radius - this.lx;
-        } else if (this.lx + speed.x - this.radius < gridOffset) {
-            speed.x = gridOffset + this.radius - this.lx;
+        if (this.position.x + speed.x + this.radius > width - gridOffset) {
+            speed.x = (width - gridOffset) - this.radius - this.position.x;
+        } else if (this.position.x + speed.x - this.radius < gridOffset) {
+            speed.x = gridOffset + this.radius - this.position.x;
         }
         // If I keep moving in my current Y direction, will I collide with the border?
-        if (this.ly + speed.y + this.radius > height - gridOffset) {
-            speed.y = (height - gridOffset) - this.radius - this.ly;
-        } else if (this.ly + speed.y - this.radius < gridOffset) {
-            speed.y = gridOffset + this.radius - this.ly;
+        if (this.position.y + speed.y + this.radius > height - gridOffset) {
+            speed.y = (height - gridOffset) - this.radius - this.position.y;
+        } else if (this.position.y + speed.y - this.radius < gridOffset) {
+            speed.y = gridOffset + this.radius - this.position.y;
         }
         return speed;
     }
 
     checkTileCollision(speed) {
-        var collisions = this.getCollisionsAfterMovement(speed);
-        
+        var collisions = this.getCollisionsAfterMovement(new p5.Vector(this.position.x, this.position.y), speed);
+
         if (collisions.length > 0) {
-            shapes.push({ "shape": "circle", "x": this.lx + speed.x, "y": this.ly + speed.y, "diameter": this.size })
+            shapes.push({ "shape": "circle", "x": this.position.x + speed.x, "y": this.position.y + speed.y, "diameter": this.size })
         }
 
         console.log("")
@@ -95,8 +94,8 @@ class Player {
 
             collision.object.color = "red";
 
-            var d = getDistanceFromCircleToRectangle(this.lx, this.ly,
-                object.lx, object.ly, object.size, object.size);
+            var d = getDistanceFromCircleToRectangle(this.position.x, this.position.y,
+                object.position.x, object.position.y, object.size, object.size);
             var constraint = new PlayerTileRelationship(object, d);
 
             console.log("Distance: " + constraint.distance.toString())
@@ -109,7 +108,7 @@ class Player {
         return speed;
     }
 
-    getCollisionsAfterMovement(speed) {
+    getCollisionsAfterMovement(position, speed) {
         var collisions = [];
         var neighborTiles = this.getNeighborTiles();
         for (var n = 0; n < neighborTiles.length; n++) {
@@ -119,8 +118,8 @@ class Player {
                 neighborSection.color = "yellow";
                 if (!neighborSection.enterable) {
                     // If I keep moving in my current direction, how far will I be from this section?
-                    var d = getDistanceFromCircleToRectangle(this.lx + speed.x, this.ly + speed.y,
-                        neighborSection.lx, neighborSection.ly, neighborSection.size, neighborSection.size);
+                    var d = getDistanceFromCircleToRectangle(position.x + speed.x, position.y + speed.y,
+                        neighborSection.position.x, neighborSection.position.y, neighborSection.size, neighborSection.size);
                     var relationship = new PlayerTileRelationship(neighborSection, d);
                     if (relationship.isACollision(this.radius)) {
                         collisions.push(relationship);
@@ -134,8 +133,8 @@ class Player {
     }
 
     getTileOn() {
-        var gx = floor((this.lx - gridOffset) / tileSize);
-        var gy = floor((this.ly - gridOffset) / tileSize);
+        var gx = floor((this.position.x - gridOffset) / tileSize);
+        var gy = floor((this.position.y - gridOffset) / tileSize);
         this.tileOn = grid[[gx, gy]];
     }
 
@@ -143,8 +142,8 @@ class Player {
         var neighborTiles = [];
         for (var x = -1; x <= 1; x++) {
             for (var y = -1; y <= 1; y++) {
-                var neighborgx = this.tileOn.gx + x;
-                var neighborgy = this.tileOn.gy + y;
+                var neighborgx = this.tileOn.gridPosition.x + x;
+                var neighborgy = this.tileOn.gridPosition.y + y;
                 if (neighborgx >= 0 && neighborgx < cols && neighborgy >= 0 && neighborgy < rows) {
                     var neighborTile = grid[[neighborgx, neighborgy]];
                     neighborTiles.push(neighborTile);

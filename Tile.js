@@ -1,10 +1,8 @@
 
 class Tile {
     constructor(lx, ly, size) {
-        this.lx = lx;
-        this.ly = ly;
-        this.gx = null;
-        this.gy = null;
+        this.position = new p5.Vector(lx, ly)
+        this.gridPosition = new p5.Vector();
         this.size = size;
 
         this.sections = this.makeSections();
@@ -16,24 +14,24 @@ class Tile {
         var fullOffset = this.size * 2 / 3;
         var halfOffset = this.size * 1 / 3;
 
-        sections[[0, 0]] = new Wall(this, this.lx, this.ly, sectionSize);
-        sections[[2, 0]] = new Wall(this, this.lx + fullOffset, this.ly, sectionSize);
-        sections[[0, 2]] = new Wall(this, this.lx, this.ly + fullOffset, sectionSize);
-        sections[[2, 2]] = new Wall(this, this.lx + fullOffset, this.ly + fullOffset, sectionSize);
+        sections[[0, 0]] = new Wall(this, this.position.x, this.position.y, sectionSize);
+        sections[[2, 0]] = new Wall(this, this.position.x + fullOffset, this.position.y, sectionSize);
+        sections[[0, 2]] = new Wall(this, this.position.x, this.position.y + fullOffset, sectionSize);
+        sections[[2, 2]] = new Wall(this, this.position.x + fullOffset, this.position.y + fullOffset, sectionSize);
 
         this.randomizeWalls();
 
         var northClass = this.openNorth ? TileSection : Wall;
-        sections[[1, 0]] = new northClass(this, this.lx + halfOffset, this.ly, sectionSize);
+        sections[[1, 0]] = new northClass(this, this.position.x + halfOffset, this.position.y, sectionSize);
 
         var eastClass = this.openEast ? TileSection : Wall;
-        sections[[2, 1]] = new eastClass(this, this.lx + fullOffset, this.ly + halfOffset, sectionSize);
+        sections[[2, 1]] = new eastClass(this, this.position.x + fullOffset, this.position.y + halfOffset, sectionSize);
 
         var southClass = this.openSouth ? TileSection : Wall;
-        sections[[1, 2]] = new southClass(this, this.lx + halfOffset, this.ly + fullOffset, sectionSize);
+        sections[[1, 2]] = new southClass(this, this.position.x + halfOffset, this.position.y + fullOffset, sectionSize);
 
         var westClass = this.openWest ? TileSection : Wall;
-        sections[[0, 1]] = new westClass(this, this.lx, this.ly + halfOffset, sectionSize);
+        sections[[0, 1]] = new westClass(this, this.position.x, this.position.y + halfOffset, sectionSize);
 
         return sections;
     }
@@ -52,7 +50,7 @@ class Tile {
         stroke(0);
         noFill();
         strokeWeight(2);
-        rect(this.lx, this.ly, this.size, this.size);
+        rect(this.position.x, this.position.y, this.size, this.size);
         strokeWeight(1);
 
         for (var xy = 0; xy < Object.keys(this.sections).length; xy++) {
@@ -62,7 +60,7 @@ class Tile {
     }
 
     isTarget(x, y) {
-        return pointRectangleCollision(x, y, this.lx, this.ly, this.size, this.size);
+        return pointRectangleCollision(x, y, this.position.x, this.position.y, this.size, this.size);
     }
 
     click() {
@@ -71,22 +69,20 @@ class Tile {
     }
 }
 
-
 class GridTile extends Tile {
     constructor(gx, gy, size) {
         var lx = (gx * size) + gridOffset;
         var ly = (gy * size) + gridOffset;
         super(lx, ly, size);
-        this.gx = gx;
-        this.gy = gy;
+        this.gridPosition = new p5.Vector(gx, gy);
     }
 }
+
 
 class TileSection {
     constructor(parentTile, lx, ly, size) {
         this.parentTile = parentTile;
-        this.lx = lx;
-        this.ly = ly;
+        this.position = new p5.Vector(lx, ly);
         this.size = size;
         this.enterable = true;
     }
@@ -105,6 +101,6 @@ class Wall extends TileSection {
 
     show() {
         fill(this.color);
-        rect(this.lx, this.ly, this.size, this.size);
+        rect(this.position.x, this.position.y, this.size, this.size);
     }
 }
