@@ -68,19 +68,15 @@ class Player {
     checkBorderCollision(speed) {
         // If I keep moving in my current X direction, will I collide with the border?
         if (this.lx + speed.x + this.radius > width - gridOffset) {
-            this.lx = (width - gridOffset) - this.radius;
-            speed.x = 0;
+            speed.x = (width - gridOffset) - this.radius - this.lx;
         } else if (this.lx + speed.x - this.radius < gridOffset) {
-            this.lx = gridOffset + this.radius;
-            speed.x = 0;
+            speed.x = gridOffset + this.radius - this.lx;
         }
         // If I keep moving in my current Y direction, will I collide with the border?
         if (this.ly + speed.y + this.radius > height - gridOffset) {
-            this.ly = (height - gridOffset) - this.radius;
-            speed.y = 0;
+            speed.y = (height - gridOffset) - this.radius - this.ly;
         } else if (this.ly + speed.y - this.radius < gridOffset) {
-            this.ly = gridOffset + this.radius;
-            speed.y = 0;
+            speed.y = gridOffset + this.radius - this.ly;
         }
         return speed;
     }
