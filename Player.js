@@ -1,4 +1,4 @@
-var playerSpeed = 3;
+var playerSpeed = 1.5;
 var MoveLeftKeyCode = 65; // A
 var MoveRightKeyCode = 68; // D
 var MoveUpKeyCode = 87; // W
@@ -9,7 +9,7 @@ class Player {
     constructor(startingTile, color) {
         this.tileOn = startingTile;
         var offset = this.tileOn.size / 2;
-        this.position = new p5.Vector(startingTile.position.x + offset, startingTile.position.y + offset)
+        this.position = new p5.Vector(startingTile.position.x + offset, startingTile.position.y + offset);
         this.size = this.tileOn.size / 5;
         this.radius = this.size / 2;
         this.color = color;
@@ -22,6 +22,12 @@ class Player {
         ellipse(this.position.x, this.position.y, this.size, this.size);
     }
 
+    update() {
+        if (this.ableToMove) {
+            this.move();
+        }
+    }
+
     move() {
         var neighborTiles = this.getNeighborTiles();
         for (var n = 0; n < neighborTiles.length; n++) {
@@ -32,36 +38,35 @@ class Player {
             }
         }
 
-        if (this.ableToMove) {
-            var speed = new p5.Vector(0, 0);
-            if (keyIsDown(MoveLeftKeyCode)) {
-                speed.x -= playerSpeed;
-            }
-            if (keyIsDown(MoveRightKeyCode)) {
-                speed.x += playerSpeed;
-            }
-            if (keyIsDown(MoveUpKeyCode)) {
-                speed.y -= playerSpeed;
-            }
-            if (keyIsDown(MoveDownKeyCode)) {
-                speed.y += playerSpeed;
-            }
-
-            if (speed.x != 0 || speed.y != 0) {
-                speed = this.checkBorderCollision(speed);
-            }
-
-            if (speed.x != 0 || speed.y != 0) {
-                speed = this.checkTileCollision(speed);
-            }
-
-            if (speed.x != 0 || speed.y != 0) {
-                this.position.x += speed.x;
-                this.position.y += speed.y;
-            }
-
-            this.getTileOn();
+        var speed = new p5.Vector(0, 0);
+        if (keyIsDown(MoveLeftKeyCode)) {
+            speed.x -= playerSpeed;
         }
+        if (keyIsDown(MoveRightKeyCode)) {
+            speed.x += playerSpeed;
+        }
+        if (keyIsDown(MoveUpKeyCode)) {
+            speed.y -= playerSpeed;
+        }
+        if (keyIsDown(MoveDownKeyCode)) {
+            speed.y += playerSpeed;
+        }
+
+        if (speed.x != 0 || speed.y != 0) {
+            speed = this.checkBorderCollision(speed);
+        }
+
+        if (speed.x != 0 || speed.y != 0) {
+            speed = this.checkTileCollision(speed);
+        }
+
+        if (speed.x != 0 || speed.y != 0) {
+            this.position.x += speed.x;
+            this.position.y += speed.y;
+        }
+
+        this.getTileOn();
+
     }
 
     checkBorderCollision(speed) {
@@ -87,7 +92,7 @@ class Player {
             shapes.push({ "shape": "circle", "x": this.position.x + speed.x, "y": this.position.y + speed.y, "diameter": this.size })
         }
 
-        console.log("")
+        //console.log("")
         for (var i = 0; i < collisions.length; i++) {
             var collision = collisions[i];
             var object = collision.object;
@@ -98,11 +103,11 @@ class Player {
                 object.position.x, object.position.y, object.size, object.size);
             var constraint = new PlayerTileRelationship(object, d);
 
-            console.log("Distance: " + constraint.distance.toString())
-            console.log("Mag: " + constraint.magnitude.toString())
+            //console.log("Distance: " + constraint.distance.toString())
+            //console.log("Mag: " + constraint.magnitude.toString())
 
             var travelDistance = constraint.getTravelDistance(speed, this.radius);
-            console.log("travelDistance: " + travelDistance.toString());
+            //console.log("travelDistance: " + travelDistance.toString());
             speed = travelDistance;
         }
         return speed;
@@ -135,7 +140,7 @@ class Player {
     getTileOn() {
         var gx = floor((this.position.x - gridOffset) / tileSize);
         var gy = floor((this.position.y - gridOffset) / tileSize);
-        this.tileOn = grid[[gx, gy]];
+        this.tileOn = grid[gx][gy];
     }
 
     getNeighborTiles() {
@@ -145,7 +150,7 @@ class Player {
                 var neighborgx = this.tileOn.gridPosition.x + x;
                 var neighborgy = this.tileOn.gridPosition.y + y;
                 if (neighborgx >= 0 && neighborgx < cols && neighborgy >= 0 && neighborgy < rows) {
-                    var neighborTile = grid[[neighborgx, neighborgy]];
+                    var neighborTile = grid[neighborgx][neighborgy];
                     neighborTiles.push(neighborTile);
                 }
             }

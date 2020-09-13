@@ -26,15 +26,17 @@ function resetSketch(clear = true) {
     if (clear) console.clear();
     grid = makeGrid(cols, rows);
     extraTile = new Tile(0, 0, tileSize);
+    ableToPush = true;
     arrows = makeArrows();
-    player = new Player(grid[[0, 0]], "red");
+    player = new Player(grid[0][0], "red");
 }
 
 function makeGrid(cols, rows) {
-    var grid = {};
+    var grid = [];
     for (var x = 0; x < cols; x++) {
+        grid[x] = [];
         for (var y = 0; y < rows; y++) {
-            grid[[x, y]] = new GridTile(x, y, tileSize);
+            grid[x][y] = new GridTile(x, y, tileSize);
         }
     }
     return grid;
@@ -58,19 +60,25 @@ function draw() {
     background(255);
     cursor('default');
     mouseHovered();
-    for (var xy = 0; xy < Object.keys(grid).length; xy++) {
-        var tile = grid[Object.keys(grid)[xy]];
-        tile.show();
+    for (var x = 0; x < grid.length; x++) {
+        for (var y = 0; y < grid[x].length; y++) {
+            var tile = grid[x][y];
+            tile.update();
+            tile.show();
+        }
     }
 
-    extraTile.show();
+    if (extraTile != null) {
+        extraTile.update();
+        extraTile.show();
+    }
 
     for (var i = 0; i < arrows.length; i++) {
         var arrow = arrows[i];
         arrow.show();
     }
 
-    player.move();
+    player.update();
     player.show();
 
     noFill();
@@ -118,18 +126,20 @@ function mouseReleased() {
         }
     }
 
-    for (var xy = 0; xy < Object.keys(grid).length; xy++) {
-        var tile = grid[Object.keys(grid)[xy]];
-        if (!foundTarget && tile.isTarget(mouseX, mouseY)) {
-            foundTarget = true;
-            tile.click();
-        }
-        if (foundTarget) {
-            return;
+    for (var x = 0; x < grid.length; x++) {
+        for (var y = 0; y < grid[x].length; y++) {
+            var tile = grid[x][y];
+            if (!foundTarget && tile.isTarget(mouseX, mouseY)) {
+                foundTarget = true;
+                tile.click();
+            }
+            if (foundTarget) {
+                return;
+            }
         }
     }
 
-    if (!foundTarget && extraTile.isTarget(mouseX, mouseY)) {
+    if (!foundTarget && extraTile != null && extraTile.isTarget(mouseX, mouseY)) {
         foundTarget = true;
         extraTile.click();
     }
@@ -145,4 +155,48 @@ function signOf(x) {
 function roundToDigits(x, digits) {
     var place = 10 ** digits;
     return Math.round(x * place) / place;
+}
+
+var ableToPush = true;
+function pushTileIn() {
+    if (ableToPush) {
+        ableToPush = false;
+
+        var newGridPositionX = 1;
+        var newGridPositionY = -1;
+        var newTile = new GridTile(newGridPositionX, newGridPositionY, tileSize, extraTile.sections);
+        grid[newGridPositionX][newGridPositionY] = newTile;
+        extraTile = null;
+
+        newGrid = [];
+        for (var x = 0; x < grid.length; x++) {
+            newGrid[x] = [];
+            for (var y = -1; y < grid[x].length; y++) {
+                var tile = grid[x][y];
+                if (x == newGridPositionX) {
+                    tile.moveToPosition = new p5.Vector(tile.position.x, tile.position.y + tileSize);
+                    newGrid[x][y + 1] = tile;
+                } else {
+                    newGrid[x][y] = tile;
+                }
+            }
+        }
+        grid = newGrid;
+    }
+}
+
+function pushDone(pushedTile) {
+    ableToPush = true;
+    for (var x = 0; x < grid.length; x++) {
+        for (var y = 0; y < grid[x].length; y++) {
+            var tile = grid[x][y];
+            if (tile == pushedTile) {
+                break;
+            }
+        }
+    }
+    extraTile = pushedTile;
+    ableToPush = true;
+
+    extraTile.position = new p5.Vector(0, 0);
 }
