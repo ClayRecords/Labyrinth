@@ -1,21 +1,15 @@
 var tileSpeed = 2;
 
-class Tile {
-    constructor(lx, ly, size, sections = null) {
-        this.position = new p5.Vector(lx, ly);
-        this.moveToPosition = null;
-        this.gridPosition = new p5.Vector();
+class GridTile {
+    constructor(gx, gy, size, uniqueID) {
+        this.uniqueID = uniqueID;
+        this.gridPosition = new p5.Vector(gx, gy);
         this.size = size;
+        this.getPositionFromGridPosition();
+        this.moveToPosition = null;
+        this.moveToGridPosition = null;
 
-        if (sections === null) {
-            this.sections = this.makeSections();
-        } else {
-            this.sections = sections;
-            for (var xy = 0; xy < Object.keys(this.sections).length; xy++) {
-                var section = this.sections[Object.keys(this.sections)[xy]];
-                section.parentTile = this;
-            }
-        }
+        this.sections = this.makeSections();
     }
 
     makeSections() {
@@ -64,6 +58,26 @@ class Tile {
         this.updateSections();
     }
 
+    pushIntoBoard(newGridPositionX, newGridPositionY) {
+        this.gridPosition = new p5.Vector(newGridPositionX, newGridPositionY);
+        this.getPositionFromGridPosition();
+    }
+
+    pushX(direction) {
+        var offset = tileSize * direction;
+        this.moveToPosition = new p5.Vector(this.position.x + offset, tile.position.y);
+        this.moveToGridPosition = this.gridPosition;
+        this.moveToGridPosition.x = this.moveToGridPosition.x + direction;
+    }
+
+    pushY(direction) {
+        var offset = tileSize * direction;
+        this.moveToPosition = new p5.Vector(this.position.x, this.position.y + offset);
+        this.moveToGridPosition = this.gridPosition;
+        this.moveToGridPosition.y = this.moveToGridPosition.y + direction;
+        console.log("pushY " + this.uniqueID)
+    }
+
     move() {
         var speed = new p5.Vector(0, 0);
         if (this.position.x != this.moveToPosition.x) {
@@ -88,10 +102,15 @@ class Tile {
         this.position.y += speed.y;
 
         if (this.position.equals(this.moveToPosition)) {
+            this.moveToPosition = null; // Stop moving
+            this.gridPosition = this.moveToGridPosition;
+            this.moveToGridPosition = null;
+            console.log(this.uniqueID + " arrived")
             if (this.position.y >= height - gridOffset - 1) {
+                console.log("Pushed")
+                // This tile was pushed off the grid
                 pushDone(this);
             }
-            this.moveToPosition = null;
         }
     }
 
@@ -113,6 +132,9 @@ class Tile {
             var section = this.sections[Object.keys(this.sections)[xy]];
             section.show();
         }
+
+        noFill();
+        text(this.uniqueID, this.position.x, this.position.y + 10)
     }
 
     isTarget(x, y) {
@@ -121,16 +143,22 @@ class Tile {
 
     click() {
         var rightClicked = mouseButton == RIGHT;
-        console.log("Clicked Tile");
+        console.log("Clicked Tile: " + this.uniqueID);
+        console.log("\tX:" + this.position.x.toString())
+        console.log("\tY:" + this.position.y.toString())
+        if (this.gridPosition != null) {
+            console.log("\tgX:" + this.gridPosition.x.toString())
+            console.log("\tgY:" + this.gridPosition.y.toString())
+        } else {
+            console.log("\tgX: null")
+            console.log("\tgY: null")
+        }
     }
-}
 
-class GridTile extends Tile {
-    constructor(gx, gy, size, sections = null) {
-        var lx = (gx * size) + gridOffset;
-        var ly = (gy * size) + gridOffset;
-        super(lx, ly, size, sections);
-        this.gridPosition = new p5.Vector(gx, gy);
+    getPositionFromGridPosition() {
+        var lx = (this.gridPosition.x * this.size) + gridOffset;
+        var ly = (this.gridPosition.y * this.size) + gridOffset;
+        this.position = new p5.Vector(lx, ly);
     }
 }
 

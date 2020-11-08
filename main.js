@@ -25,7 +25,6 @@ function setup() {
 function resetSketch(clear = true) {
     if (clear) console.clear();
     grid = makeGrid(cols, rows);
-    extraTile = new Tile(0, 0, tileSize);
     ableToPush = true;
     arrows = makeArrows();
     player = new Player(grid[0][0], "red");
@@ -36,9 +35,11 @@ function makeGrid(cols, rows) {
     for (var x = 0; x < cols; x++) {
         grid[x] = [];
         for (var y = 0; y < rows; y++) {
-            grid[x][y] = new GridTile(x, y, tileSize);
+            grid[x][y] = new GridTile(x, y, tileSize, x.toString() + "," + y.toString());
         }
     }
+    extraTile = new GridTile(-1, -1, tileSize, "-1,-1");
+    extraTile.position = new p5.Vector(0, 0);
     return grid;
 }
 
@@ -164,17 +165,18 @@ function pushTileIn() {
 
         var newGridPositionX = 1;
         var newGridPositionY = -1;
-        var newTile = new GridTile(newGridPositionX, newGridPositionY, tileSize, extraTile.sections);
-        grid[newGridPositionX][newGridPositionY] = newTile;
-        extraTile = null;
 
+        extraTile.pushIntoBoard(newGridPositionX, newGridPositionY);
+        grid[newGridPositionX][newGridPositionY] = extraTile;
+        extraTile = null;
+        
         newGrid = [];
         for (var x = 0; x < grid.length; x++) {
             newGrid[x] = [];
             for (var y = -1; y < grid[x].length; y++) {
                 var tile = grid[x][y];
                 if (x == newGridPositionX) {
-                    tile.moveToPosition = new p5.Vector(tile.position.x, tile.position.y + tileSize);
+                    tile.pushY(1);
                     newGrid[x][y + 1] = tile;
                 } else {
                     newGrid[x][y] = tile;
@@ -191,12 +193,12 @@ function pushDone(pushedTile) {
         for (var y = 0; y < grid[x].length; y++) {
             var tile = grid[x][y];
             if (tile == pushedTile) {
+                grid[x].splice(y, 1);
                 break;
             }
         }
     }
     extraTile = pushedTile;
-    ableToPush = true;
-
     extraTile.position = new p5.Vector(0, 0);
+    extraTile.gridPosition = null;
 }
