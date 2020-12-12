@@ -61,13 +61,11 @@ function draw() {
     background(255);
     cursor('default');
     mouseHovered();
-    for (var x = 0; x < grid.length; x++) {
-        for (var y = 0; y < grid[x].length; y++) {
-            var tile = grid[x][y];
-            tile.update();
-            tile.show();
-        }
-    }
+
+    forEachTile(function () {
+        this.update();
+        this.show();
+    });
 
     if (extraTile != null) {
         extraTile.update();
@@ -93,6 +91,8 @@ function draw() {
             circle(shape["x"], shape["y"], shape["diameter"])
         }
     }
+
+    $('.pushBtn').prop('disabled', !ableToPush);
 }
 
 function mouseHovered() {
@@ -128,7 +128,9 @@ function mouseReleased() {
     }
 
     for (var x = 0; x < grid.length; x++) {
+        if (grid[x] === undefined) { continue } // No tiles outside the x grid
         for (var y = 0; y < grid[x].length; y++) {
+            if (grid[x][y] === undefined) { continue } // No tiles outside the y grid at x
             var tile = grid[x][y];
             if (!foundTarget && tile.isTarget(mouseX, mouseY)) {
                 foundTarget = true;
@@ -159,7 +161,8 @@ function roundToDigits(x, digits) {
 }
 
 var ableToPush = true;
-function pushTileIn() {
+function pushTileDown() {
+    console.log("pushTileDown")
     if (ableToPush) {
         ableToPush = false;
 
@@ -169,11 +172,13 @@ function pushTileIn() {
         extraTile.pushIntoBoard(newGridPositionX, newGridPositionY);
         grid[newGridPositionX][newGridPositionY] = extraTile;
         extraTile = null;
-        
+
         newGrid = [];
         for (var x = 0; x < grid.length; x++) {
+            if (grid[x] === undefined) { continue }
             newGrid[x] = [];
             for (var y = -1; y < grid[x].length; y++) {
+                if (grid[x][y] === undefined) { continue }
                 var tile = grid[x][y];
                 if (x == newGridPositionX) {
                     tile.pushY(1);
@@ -187,18 +192,56 @@ function pushTileIn() {
     }
 }
 
-function pushDone(pushedTile) {
-    ableToPush = true;
-    for (var x = 0; x < grid.length; x++) {
-        for (var y = 0; y < grid[x].length; y++) {
-            var tile = grid[x][y];
-            if (tile == pushedTile) {
-                grid[x].splice(y, 1);
-                break;
+function pushTileUp() {
+    console.log("pushTileUp")
+    if (ableToPush) {
+        ableToPush = false;
+
+        var newGridPositionX = 1;
+        var newGridPositionY = rows;
+
+        extraTile.pushIntoBoard(newGridPositionX, newGridPositionY);
+        grid[newGridPositionX][newGridPositionY] = extraTile;
+        extraTile = null;
+
+        newGrid = [];
+        for (var x = 0; x < grid.length; x++) {
+            if (grid[x] === undefined) { continue }
+            newGrid[x] = [];
+            for (var y = -1; y < grid[x].length; y++) {
+                if (grid[x][y] === undefined) { continue }
+                var tile = grid[x][y];
+                if (x == newGridPositionX) {
+                    tile.pushY(-1);
+                    newGrid[x][y - 1] = tile;
+                } else {
+                    newGrid[x][y] = tile;
+                }
             }
         }
+        grid = newGrid;
     }
+}
+
+function pushDone(pushedTile) {
+    ableToPush = true;
+    forEachTile(function (x, y) {
+        if (this == pushedTile) {
+            grid[x][y] = undefined;
+        }
+    });
     extraTile = pushedTile;
     extraTile.position = new p5.Vector(0, 0);
     extraTile.gridPosition = null;
+}
+
+function forEachTile(func) {
+    for (var x = -1; x < grid.length; x++) {
+        if (grid[x] === undefined) { continue } // No tiles outside the x grid
+        for (var y = -1; y < grid[x].length; y++) {
+            if (grid[x][y] === undefined) { continue } // No tiles outside the y grid at x
+            var tile = grid[x][y];
+            func.apply(tile, [x, y]);
+        }
+    }
 }

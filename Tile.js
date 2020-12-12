@@ -75,7 +75,6 @@ class GridTile {
         this.moveToPosition = new p5.Vector(this.position.x, this.position.y + offset);
         this.moveToGridPosition = this.gridPosition;
         this.moveToGridPosition.y = this.moveToGridPosition.y + direction;
-        console.log("pushY " + this.uniqueID)
     }
 
     move() {
@@ -106,10 +105,9 @@ class GridTile {
             this.gridPosition = this.moveToGridPosition;
             this.moveToGridPosition = null;
             console.log(this.uniqueID + " arrived")
-            if (this.position.y >= height - gridOffset - 1) {
-                console.log("Pushed")
-                // This tile was pushed off the grid
-                pushDone(this);
+            if (this.position.y >= height - gridOffset - 1 || this.position.y + this.size <= gridOffset) {
+                console.log(this.uniqueID + " was pushed off the grid")
+                pushDone(this); // This tile was pushed off the grid
             }
         }
     }

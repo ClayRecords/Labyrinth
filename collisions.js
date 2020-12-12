@@ -1,6 +1,5 @@
 
 function circleRectangleCollision(cx, cy, radius, rx, ry, rw, rh) {
-
     // temporary variables to set edges for testing
     testX = cx;
     testY = cy;

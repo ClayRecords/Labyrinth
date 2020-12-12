@@ -19,6 +19,7 @@
     <script src="Player.js"></script>
     <script src="Arrow.js"></script>
     <script src="collisions.js"></script>
+    <script src="miscFuncs.js"></script>
 </head>
 <body>
     <h2>Labyrinth</h2>
@@ -26,7 +27,8 @@
     </div>
     <div class="controls">
         <button type="button" class="restartBtn btn btn-primary" onclick="resetSketch();">Restart</button>
-        <button type="button" class="pushBtn btn btn-primary" onclick="pushTileIn();">Push</button>
+        <button type="button" class="pushBtn btn btn-primary" onclick="pushTileDown();">Push Down</button>
+        <button type="button" class="pushBtn btn btn-primary" onclick="pushTileUp();">Push Up</button>
     </div>
     <script>
         window.addEventListener("keydown", function (e) {
