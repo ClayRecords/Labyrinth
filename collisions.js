@@ -75,7 +75,7 @@ function pointRectangleCollision(px, py, rx, ry, width, height) {
     return (px > rx && px < (rx + width) && py > ry && py < ry + height);
 }
 
-class PlayerTileRelationship{
+class PlayerTileRelationship { // TODO this is a mess and should be deleted
     constructor(object, distance) {
         this.object = object;
         this.distance = distance;

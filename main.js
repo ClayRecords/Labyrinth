@@ -18,7 +18,7 @@ function setup() {
     var canvas = createCanvas(gridWidth + (gridOffset * 2), gridHeight + (gridOffset * 2));
     canvas.parent('canvasContainer');
     $('.p5Canvas').on('contextmenu', event => event.preventDefault());
-    //frameRate(3)
+    frameRate(60);
     resetSketch(false);
 }
 

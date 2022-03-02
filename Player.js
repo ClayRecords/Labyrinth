@@ -52,6 +52,10 @@ class Player {
             speed.y += playerSpeed;
         }
 
+        if (speed.mag() > playerSpeed) {
+            speed.normalize().mult(playerSpeed);
+        }
+
         if (speed.x != 0 || speed.y != 0) {
             speed = this.checkBorderCollision(speed);
         }
@@ -66,7 +70,6 @@ class Player {
         }
 
         this.getTileOn();
-
     }
 
     checkBorderCollision(speed) {
