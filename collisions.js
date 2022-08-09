@@ -28,7 +28,7 @@ function circleRectangleCollision(cx, cy, radius, rx, ry, rw, rh) {
     return false;
 }
 
-function getDistanceFromCircleToRectangle(cx, cy, rx, ry, rw, rh) {
+function getDistanceFromPointToRectangle(cx, cy, rx, ry, rw, rh) {
     // temporary variables to set edges for testing
     testX = cx;
     testY = cy;
@@ -49,6 +49,34 @@ function getDistanceFromCircleToRectangle(cx, cy, rx, ry, rw, rh) {
     distX = testX - cx;
     distY = testY - cy;
     distance = new p5.Vector(distX, distY);
+
+    return distance;
+}
+
+function getDistanceFromCircleBorderToRectangleBorder(cx, cy, cr, rx, ry, rw, rh) {
+    // temporary variables to set edges for testing
+    testX = cx;
+    testY = cy;
+
+    // which edge is closest?
+    if (cx < rx) {// left edge
+        testX = rx;
+    } else if (cx > rx + rw) {
+        testX = rx + rw;// right edge
+    }
+    if (cy < ry) {// top edge
+        testY = ry;
+    } else if (cy > ry + rh) {// bottom edge
+        testY = ry + rh;
+    }
+
+    // get distance from closest edges
+    distX = testX - cx;
+    distY = testY - cy;
+    distance = new p5.Vector(distX, distY);
+
+    closestCircleBorder = new p5.Vector(distance.x, distance.y).limit(cr);
+    distance.sub(closestCircleBorder);
 
     return distance;
 }
@@ -84,42 +112,5 @@ class PlayerTileRelationship { // TODO this is a mess and should be deleted
 
     isACollision(radius) {
         return Math.abs(this.magnitude) - 1 < radius;
-    }
-
-    getTravelDistance(speed, radius) {
-        var travelDistance = new p5.Vector(speed.x, speed.y);
-        if (speed.x != 0 && this.distance.y == 0) {
-            // There is a purely horizontal collision
-            travelDistance.x = this.getComponentTravelDistance(this.distance.x, radius);
-        } else if (speed.y != 0 && this.distance.x == 0) {
-            // There is a purely vertical collision
-            travelDistance.y = this.getComponentTravelDistance(this.distance.y, radius);
-        } else {
-            // There is a horizontal collision and vertical collision
-            var movementDistance = this.magnitude - radius - 1;
-
-            if (speed.x != 0) {
-                var xMovementDistance = this.getRatiodTravelDistance(this.distance.x, movementDistance)
-                travelDistance.x = xMovementDistance;
-            }
-
-            if (speed.y != 0) {
-                var yMovementDistance = this.getRatiodTravelDistance(this.distance.y, movementDistance)
-                travelDistance.y = yMovementDistance;
-            }
-        }
-        return travelDistance;
-    }
-
-    getComponentTravelDistance(componentDistance, radius) {
-        var sign = signOf(componentDistance);
-        var travelDistance = componentDistance - (radius * sign) - sign;
-        return travelDistance;
-    }
-
-    getRatiodTravelDistance(componentDistance, movementDistance) {
-        var ratio = componentDistance / this.magnitude;
-        var travelDistance = ratio * movementDistance;
-        return travelDistance;
     }
 }

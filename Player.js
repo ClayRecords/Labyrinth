@@ -52,9 +52,7 @@ class Player {
             speed.y += playerSpeed;
         }
 
-        if (speed.mag() > playerSpeed) {
-            speed.normalize().mult(playerSpeed);
-        }
+        speed.limit(playerSpeed);
 
         if (speed.x != 0 || speed.y != 0) {
             speed = this.checkBorderCollision(speed);
@@ -88,30 +86,44 @@ class Player {
         return speed;
     }
 
+    checkTileCollision_WORKING(speed) {
+        var collisions = this.getCollisionsAfterMovement(new p5.Vector(this.position.x, this.position.y), speed);
+
+        if (collisions.length) {
+            if (abs(speed.y) > 0 && abs(speed.x) > 0) {
+                var xAttemptSpeed = this.checkTileCollision(new p5.Vector(speed.x, 0));
+                if (xAttemptSpeed.mag() > 0) {
+                    return xAttemptSpeed;
+                }
+                var yAttemptSpeed = this.checkTileCollision(new p5.Vector(0, speed.y));
+                if (yAttemptSpeed.mag() > 0) {
+                    return yAttemptSpeed;
+                }
+            }
+
+            return new p5.Vector(0, 0);
+        }
+        return speed;
+    }
+
     checkTileCollision(speed) {
         var collisions = this.getCollisionsAfterMovement(new p5.Vector(this.position.x, this.position.y), speed);
 
-        if (collisions.length > 0) {
-            shapes.push({ "shape": "circle", "x": this.position.x + speed.x, "y": this.position.y + speed.y, "diameter": this.size })
-        }
+        if (collisions.length) {
+            console.log("")
+            var smallestConstraint = null;
+            var smallestConstraintTravelMagnitude = null;
 
-        //console.log("")
-        for (var i = 0; i < collisions.length; i++) {
-            var collision = collisions[i];
-            var object = collision.object;
+            for (var i = 0; i < collisions.length; i++) {
+                var collision = collisions[i];
+                var object = collision.object;
 
-            collision.object.color = "red";
+                var d = getDistanceFromPointToRectangle(this.position.x, this.position.y, object.position.x, object.position.y, object.size, object.size);
+                var constraint = new PlayerTileRelationship(object, d);
 
-            var d = getDistanceFromCircleToRectangle(this.position.x, this.position.y,
-                object.position.x, object.position.y, object.size, object.size);
-            var constraint = new PlayerTileRelationship(object, d);
 
-            //console.log("Distance: " + constraint.distance.toString())
-            //console.log("Mag: " + constraint.magnitude.toString())
-
-            var travelDistance = constraint.getTravelDistance(speed, this.radius);
-            //console.log("travelDistance: " + travelDistance.toString());
-            speed = travelDistance;
+            }
+            speed = new p5.Vector(0, 0)
         }
         return speed;
     }
@@ -126,12 +138,13 @@ class Player {
                 neighborSection.color = "yellow";
                 if (!neighborSection.enterable) {
                     // If I keep moving in my current direction, how far will I be from this section?
-                    var d = getDistanceFromCircleToRectangle(position.x + speed.x, position.y + speed.y,
+                    var d = getDistanceFromPointToRectangle(position.x + speed.x, position.y + speed.y,
                         neighborSection.position.x, neighborSection.position.y, neighborSection.size, neighborSection.size);
                     var relationship = new PlayerTileRelationship(neighborSection, d);
                     if (relationship.isACollision(this.radius)) {
+                        relationship.object.color = "red";
                         collisions.push(relationship);
-                    } else if (relationship.magnitude - this.radius < 1.5) {
+                    } else if (relationship.magnitude - this.radius < 1.5) { // If it is nearby
                         relationship.object.color = "orange";
                     }
                 }
